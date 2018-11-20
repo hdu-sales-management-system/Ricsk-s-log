@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 import json
+from django.http import QueryDict
 # Create your views here.
 from .models import *
 
@@ -137,7 +138,18 @@ def car(request, user_id):
     if request.method == 'POST':
         return
     if request.method == 'DELETE':
-        return
+        delete = QueryDict(request.body)
+        key = delete.get('id')
+        if(key):
+            car = User.objects.filter(pk=user_id)[0].car_set.all()
+            for c in car:
+                if(c.present.id == key):
+                    c.delete()
+            context['error'] = 2
+            return HttpResponse(json.dumps(context), content_type="application/json")
+        else:
+            context['error'] = 3
+            return HttpResponse(json.dumps(context), content_type="application/json")
     if request.method == 'PUT':
         return
 
