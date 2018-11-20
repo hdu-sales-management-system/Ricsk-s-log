@@ -42,7 +42,7 @@ class Present(models.Model):
 
 class Order(models.Model):
     status = models.CharField(max_length=200)
-    receive_mark = models.IntegerField(default=0)#0代表未收货，1代表已收货
+    receive_mark = models.IntegerField(default=0)#0代表审核，1代表上架，2代表未上架
     present = models.ForeignKey(Present, on_delete=models.SET_NULL,null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
     present_num = models.DecimalField(max_digits=9, decimal_places=0)
