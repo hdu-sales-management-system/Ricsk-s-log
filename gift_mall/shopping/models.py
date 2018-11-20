@@ -29,15 +29,19 @@ class Present(models.Model):
 class Order(models.Model):
     status = models.CharField(max_length=200)
     receive_mark = models.IntegerField(default=0)#0代表未收货，1代表已收货
-    present = models.ForeignKey(Present, on_delete=models.SET_NULL,null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
-    present_num = models.DecimalField(max_digits=9, decimal_places=0)
     logistics = models.CharField(max_length=200)
     begin_date = models.DateTimeField()
     sum_money = models.DecimalField(max_digits=20, decimal_places=2)
     user_feedback = models.CharField(max_length=200)
     type = models.IntegerField()#0代表是用户的，1代表是供货商的
 
+
+class OrderItemU(models.Model):
+    count = models.IntegerField()
+    price = models.DecimalField(max_digits=20, decimal_places=2)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    present = models.ForeignKey(Present, on_delete=models.CASCADE)
 
 class Tag(models.Model):
     name = models.CharField(max_length=200)
@@ -47,7 +51,7 @@ class Tag(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=200)
     hot = models.IntegerField(default=0)
-    tag = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
+    categoryP = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
 
 
 class RelationshipT(models.Model):
@@ -58,3 +62,13 @@ class RelationshipT(models.Model):
 class RelationshipC(models.Model):
     ref = models.ForeignKey(Category, on_delete=models.CASCADE)
     present = models.ForeignKey(Present, on_delete=models.CASCADE)
+
+class Crousel(models.Model):
+    url = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
+    index = models.IntegerField()
+
+class Car(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    present = models.ForeignKey(Present, on_delete=models.CASCADE)
+    number = models.IntegerField(default=1)

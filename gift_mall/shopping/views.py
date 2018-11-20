@@ -7,6 +7,8 @@ import json
 # Create your views here.
 from .models import *
 
+
+#done
 def login(request):
     context = {
         'log_status': 0
@@ -18,6 +20,7 @@ def login(request):
         user = User.objects.filter(name = name, password = password)
         if user:
             request.session['IS_LOGIN'] = True
+            request.session['USER_Id'] = user[0].id
             conx = serializers.serialize("json", user)
             conx2 = '{"log_status": 1, "user": ' + conx + '}'
             return HttpResponse(conx2,content_type="application/json")
@@ -25,17 +28,21 @@ def login(request):
             return HttpResponse(json.dumps(context),content_type="application/json")
 
 
+#done
 def logout(request):
     context={
         'IS_LOGOUT': 0
     }
-    if('IS_LOGIN' in request.session):
+    if('IS_LOGIN' in request.session and 'USER_Id' in request.session):
         del request.session['IS_LOGIN']
+        del request.session['USER_Id']
         context['IS_LOGOUT'] = 1
         return HttpResponse(json.dumps(context), content_type="application/json")
     else:
         return HttpResponse(json.dumps(context), content_type="application/json")
 
+
+#done
 def register(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -67,31 +74,82 @@ def gifts(request):
     return
 
 
+#done
 def tags(request):
     tags = Tag.objects.all()
     conx = serializers.serialize("json", tags)
     return HttpResponse(conx, content_type="application/json")
 
-
+#done
 def categorise(request):
     if request.method == 'GET':
+        category = Category.objects.all()
+        conx = serializers.serialize("json", category)
+        return HttpResponse(conx, content_type="application/json")
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        category = Category.objects.filter(categoryP=id)
+        conx = serializers.serialize("json", category)
+        return HttpResponse(conx, content_type="application/json")
 
-    if reqeust.method == 'POST':
 
+#done
 def carousel(request):
-    return
+    carousel = Crousel.objects.all()
+    conx = serializers.serialize("json", carousel)
+    return HttpResponse(conx, content_type="application/json")
 
+
+#done
 def gifts_son(request, present_id):
-    return
+    context = {
+        'gift_status': 0
+    }
+    if request.method == 'GET':
+        gifts_son = Present.objects.filter(pk=present_id)
+        if(gifts_son):
+            if(gifts_son[0].status == 1):
+                conx = serializers.serialize("json", gifts_son)
+                conx2 = '{"gift_status": 1, "gift": ' + conx + '}'
+                return HttpResponse(conx2, content_type="application/json")
+            else:
+                return HttpResponse(json.dumps(context), content_type="application/json")
+        else:
+            return HttpResponse(json.dumps(context), content_type="application/json")
+
 
 def car(request, user_id):
-    return
+    user = User.objects.get(pk=user_id)
+    context = {
+        'error': 0
+    }
+    if (not user) or ('USER_Id' not in request.session) or ('IS_LOGIN' not in request.session) \
+            or (request.session['USER_Id'] != user_id):
+        context['error'] = 1
+        return HttpResponse(json.dumps(context), content_type="application/json")
+    if request.method == 'GET':
+        present = User.objects.filter(pk=user_id)[0].car_set.all()
+        cart = []
+        for p in present:
+            cart.append(p.present)
+        conx = serializers.serialize("json", cart)
+        return HttpResponse(conx, content_type="application/json")
+    if request.method == 'POST':
+        return
+    if request.method == 'DELETE':
+        return
+    if request.method == 'PUT':
+        return
 
+
+
+
+#需要讨论
 def orders(request, user_id):
     return
 
 def buy(request, order_id):
     return
-
+#需要讨论
 def search(request):
     return
