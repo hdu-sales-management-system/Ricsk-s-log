@@ -8,8 +8,8 @@ class Emploee(models.Model):
     empname = models.CharField(max_length=200)
     emppassword = models.CharField(max_length=200)
     emporder = models.IntegerField(choices=((0, '无权限'),
-                                            (1, '查看权限，上架下架'),
-                                            (2, '增删改'),
+                                            (1, '普通员工：查看权限，上架下架'),
+                                            (2, '仓库管理员：增删改'),
                                             ), default=0)
     empposit = models.CharField(max_length=200)
     empphone = models.CharField(max_length=200)
@@ -33,11 +33,12 @@ class Present(models.Model):
     name = models.CharField(max_length=200)
     on_date = models.DateTimeField()
     store_num = models.IntegerField()
-    status = models.IntegerField(default=0)#0代表未上架，1代表上架
+    status = models.IntegerField(default=0)#0代表审核，1代表上架，2代表未上架
     cost = models.DecimalField(max_digits=11, decimal_places=2)
     hot = models.IntegerField(default=0)
     off = models.IntegerField(default=0)#0代表不打折，1代表打折
-    off_cost = models.DecimalField(max_digits=3, decimal_places=2)
+    off_cost = models.DecimalField(max_digits=3, decimal_places=2,null=True)
+    url = models.CharField(max_length=200,null=True)
 
 
 class Order(models.Model):
