@@ -5,13 +5,14 @@ from django.utils import timezone
 
 #员工模型
 class Emploee(models.Model):
-    empname = models.CharField(max_length=200) #员工姓名
-    emppassword = models.CharField(max_length=200) #员工密码
-    emporder = models.IntegerField(choices=((0,'查看权限'),
-                                            (1,'查看和修改权限'),
-                                            (2,'增删改查权限')), default=0) #员工权限
-    empposit = models.CharField(max_length=200) #员工职位
-    empphone = models.CharField(max_length=200) #员工联系电话
+    empname = models.CharField(max_length=200)
+    emppassword = models.CharField(max_length=200)
+    emporder = models.IntegerField(choices=((0, '无权限'),
+                                            (1, '查看权限'),
+                                            (2, '查看和修改权限'),
+                                            (3, '增删改查权限')), default=0)
+    empposit = models.CharField(max_length=200)
+    empphone = models.CharField(max_length=200)
 
 class User(models.Model):
     name = models.CharField(max_length=200)
