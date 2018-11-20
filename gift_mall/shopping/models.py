@@ -8,9 +8,9 @@ class Emploee(models.Model):
     empname = models.CharField(max_length=200)
     emppassword = models.CharField(max_length=200)
     emporder = models.IntegerField(choices=((0, '无权限'),
-                                            (1, '查看权限'),
-                                            (2, '查看和修改权限'),
-                                            (3, '增删改查权限')), default=0)
+                                            (1, '查看权限，上架下架'),
+                                            (2, '增删改'),
+                                            ), default=0)
     empposit = models.CharField(max_length=200)
     empphone = models.CharField(max_length=200)
 
