@@ -72,7 +72,17 @@ def register(request):
 
 
 def gifts(request):
-    return
+    if request.method == 'GET':
+        count = request.GET.get('count')
+        if not count:
+            count = 10
+        offset = request.GET.get('offset')
+        if not offset:
+            offset = 0
+        tags = request.GET.get('tags')
+        if not tags:
+            tags = []
+        if not categorise
 
 
 #done
@@ -164,14 +174,22 @@ def buy(request, order_id):
     return
 #需要讨论
 def search(request):
-    if request.method == 'POST':
-        count = request.POST.get('count')
-        offset = request.POST.get('offset')
-        q = request.POST.get('q')
-        if count == '':
+    if request.method == 'GET':
+        count = request.GET.get('count')
+        offset = request.GET.get('offset')
+        q = request.GET.get('q')
+        if not count:
             count = 10
-        if offset == ''
+        if not offset:
             offset = 0
-        
+        conx = ''
+        if not q:
+            giftss = Present.objects.all().order_by('hot')[offset:count+offset]
+            conx = serializers.serialize("json", giftss)
+        else:
+            giftss = Present.objects.filter(name__icontains = q).order_by('hot')[offset:count+offset]
+            conx = serializers.serialize("json", giftss)
+
+        return HttpResponse(conx, content_type="application/json")
 
 
