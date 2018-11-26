@@ -164,4 +164,14 @@ def buy(request, order_id):
     return
 #需要讨论
 def search(request):
-    return
+    if request.method == 'POST':
+        count = request.POST.get('count')
+        offset = request.POST.get('offset')
+        q = request.POST.get('q')
+        if count == '':
+            count = 10
+        if offset == ''
+            offset = 0
+        
+
+
