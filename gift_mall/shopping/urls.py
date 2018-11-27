@@ -13,7 +13,8 @@ urlpatterns = [
     path('carousel', views.carousel, name='carousel'),
     path('gifts/<int:present_id>', views.gifts_son, name='gifts_son'),
     path('user/<int:user_id>/car', views.car, name='car'),
-    path('users/<int:user_id>/orders', views.orders, name='orders'),
+    path('user/<int:user_id>/orders', views.orders, name='orders'),
     path('buy/<int:order_id>', views.buy, name='buy'),
     path('search', views.search, name='search'),
+    path('user/<int:user_id>', views.user_info, name='user_info'),
 ]

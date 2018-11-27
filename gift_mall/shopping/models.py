@@ -43,6 +43,7 @@ class OrderItemU(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     present = models.ForeignKey(Present, on_delete=models.CASCADE)
 
+
 class Tag(models.Model):
     name = models.CharField(max_length=200)
     hot = models.IntegerField(default=0)
@@ -54,13 +55,13 @@ class Category(models.Model):
     categoryP = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
 
 
-class RelationshipT(models.Model):
-    ref = models.ForeignKey(Tag, on_delete=models.CASCADE)
+class Ret(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     present = models.ForeignKey(Present, on_delete=models.CASCADE)
 
 
-class RelationshipC(models.Model):
-    ref = models.ForeignKey(Category, on_delete=models.CASCADE)
+class Rec(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     present = models.ForeignKey(Present, on_delete=models.CASCADE)
 
 class Crousel(models.Model):

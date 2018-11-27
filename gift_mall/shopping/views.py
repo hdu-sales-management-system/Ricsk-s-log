@@ -5,6 +5,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 import json
 from django.http import QueryDict
+import urllib
 # Create your views here.
 from .models import *
 
@@ -12,7 +13,8 @@ from .models import *
 #done
 def login(request):
     context = {
-        'log_status': 0
+        'log_status': 0,
+        'user_id':-1
     }
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -22,9 +24,9 @@ def login(request):
         if user:
             request.session['IS_LOGIN'] = True
             request.session['USER_Id'] = user[0].id
-            conx = serializers.serialize("json", user)
-            conx2 = '{"log_status": 1, "user": ' + conx + '}'
-            return HttpResponse(conx2,content_type="application/json")
+            context['log_status'] = 1
+            context['user_id'] = user[0].id
+            return HttpResponse(json.dumps(context), content_type="application/json")
         else:
             return HttpResponse(json.dumps(context),content_type="application/json")
 
@@ -71,22 +73,76 @@ def register(request):
             return HttpResponse(json.dumps(context), content_type="application/json")
 
 
+#done
+def user_info(request, user_id):
+    user = User.objects.get(pk=user_id)
+    context = {
+        'error': 0
+    }
+    if (not user) or ('USER_Id' not in request.session) or ('IS_LOGIN' not in request.session) \
+            or (request.session['USER_Id'] != user_id):
+        context['error'] = 1
+        return HttpResponse(json.dumps(context), content_type="application/json")
+    if request.method == 'GET':
+        user = User.objects.filter(pk=user_id)
+        conx = serializers.serialize("json", user)
+        conx2 = '{"error": 0, "user": ' + conx + '}'
+        return HttpResponse(conx2, content_type="application/json")
+
+
+#done
 def gifts(request):
     if request.method == 'GET':
+        gifts1 = []
+        gifts2 = []
+        ls_gifts1 = Tag.objects.all()
+        ls_gifts2 = Category.objects.all()
         count = request.GET.get('count')
         if not count:
             count = 10
         offset = request.GET.get('offset')
         if not offset:
             offset = 0
-        tags = request.GET.get('tags')
-        if not tags:
-            tags = []
-        categorise = request.GET.get('categorise')
-        if not categorise:
-            categorise = []
-        return
-
+        tags = request.GET.getlist('tags')
+        #print((tags))
+        if tags:
+            tags2 = []
+            for tag in tags:
+                tags2.append(urllib.parse.unquote(tag))
+              #  print(urllib.parse.unquote(tag))
+            ls_gifts1 = Tag.objects.filter(name__in=tags2)
+        categories = request.GET.getlist('categories')
+        if categories:
+            categories2 = []
+            for tag in categories:
+                categories2.append(urllib.parse.unquote(tag))
+            ls_gifts2 = Category.objects.filter(name__in=categories2)
+        #print(ls_gifts1)
+        #print(ls_gifts2)
+        for ls_gifts1_l in ls_gifts1:
+            #print(ls_gifts1_l.name)
+           # print(3)
+            try:
+                s = ls_gifts1_l.ret_set.all()
+                #print(2)
+                for ls in s:
+                    ss = ls.present
+                    gifts1.append(ss)
+            except:
+                pass
+        for ls_gifts2_l in ls_gifts2:
+            try:
+                s = ls_gifts2_l.rec_set.all()
+                for ls in s:
+                    ss = ls.present
+                    gifts2.append(ss)
+            except:
+                pass
+        gifts1 = list(set(gifts1))
+        gifts2 = list(set(gifts2))
+        giftss = list(set(gifts1).intersection(set(gifts2)))
+        conx = serializers.serialize("json", giftss[offset:offset+count])
+        return HttpResponse(conx, content_type="application/json")
 
 #done
 def tags(request):
@@ -131,7 +187,22 @@ def gifts_son(request, present_id):
         else:
             return HttpResponse(json.dumps(context), content_type="application/json")
 
+def obj_2_json(present, number):
+    return {
+        'present_id':present.id,
+        'number':number,
+        'name': present.name,
+        "on_date": present.on_date.strftime('%Y-%m-%d %H:%M:%S'),
+        "store_num": present.store_num,
+        "status": present.status,
+        "cost": (float)(present.cost),
+        "hot": present.hot,
+        "off": present.hot,
+        "off_cost": (float)(present.off_cost),
+        "url": present.url
+    }
 
+#done
 def car(request, user_id):
     user = User.objects.get(pk=user_id)
     context = {
@@ -145,27 +216,53 @@ def car(request, user_id):
         present = User.objects.filter(pk=user_id)[0].car_set.all()
         cart = []
         for p in present:
-            cart.append(p.present)
-        conx = serializers.serialize("json", cart)
+            cart.append(obj_2_json(p.present, p.number))
+        print(cart)
+        conx = json.dumps(cart)
         return HttpResponse(conx, content_type="application/json")
     if request.method == 'POST':
-        return
+        number = request.POST.get('number')
+        present_id = request.POST.get('present_id')
+        present = Present.objects.get(pk=present_id)
+        user = User.objects.get(pk=user_id)
+        car1 = Car.objects.filter(user=user, present=present)[0]
+        if car1:
+            car1.number = number
+            car1.save()
+        else:
+            object = Car(user=user, number=number, present=present)
+            object.save()
+        return HttpResponse(json.dumps(context), content_type="application/json")
     if request.method == 'DELETE':
         delete = QueryDict(request.body)
-        key = delete.get('id')
+        key = delete.get('present_id')
         if(key):
+            #print(key)
+            present = Present.objects.get(pk=key)
+            user = User.objects.get(pk=user_id)
+            object = Car.objects.filter(user=user, present=present)[0]
+            '''
             car = User.objects.filter(pk=user_id)[0].car_set.all()
             for c in car:
                 if(c.present.id == key):
                     c.delete()
+            '''
+            object.delete()
             context['error'] = 2
             return HttpResponse(json.dumps(context), content_type="application/json")
         else:
             context['error'] = 3
             return HttpResponse(json.dumps(context), content_type="application/json")
     if request.method == 'PUT':
-        return
-
+        put = QueryDict(request.body)
+        key = put.get('present_id')
+        number = put.get('number')
+        present = Present.objects.get(pk = key)
+        user = User.objects.get(pk=user_id)
+        object = Car.objects.filter(user=user, present=present)[0]
+        object.number = number
+        object.save()
+        return HttpResponse(json.dumps(context), content_type="application/json")
 
 
 
@@ -175,7 +272,9 @@ def orders(request, user_id):
 
 def buy(request, order_id):
     return
-#需要讨论
+
+
+#done
 def search(request):
     if request.method == 'GET':
         count = request.GET.get('count')
