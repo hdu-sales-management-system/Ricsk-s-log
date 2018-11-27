@@ -30,14 +30,14 @@ class Order(models.Model):
     status = models.CharField(max_length=200)
     receive_mark = models.IntegerField(default=0)#0代表未收货，1代表已收货
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
-    logistics = models.CharField(max_length=200)
+    logistics = models.CharField(max_length=200)#物流单号
     begin_date = models.DateTimeField()
     sum_money = models.DecimalField(max_digits=20, decimal_places=2)
     user_feedback = models.CharField(max_length=200)
     type = models.IntegerField()#0代表是用户的，1代表是供货商的
 
 
-class OrderItemU(models.Model):
+class Oru(models.Model):#命名有讲究
     count = models.IntegerField()
     price = models.DecimalField(max_digits=20, decimal_places=2)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)

@@ -219,7 +219,8 @@ def car(request, user_id):
             cart.append(obj_2_json(p.present, p.number))
         print(cart)
         conx = json.dumps(cart)
-        return HttpResponse(conx, content_type="application/json")
+        conx2 = '{"error": 0, "car": ' + conx + '}'
+        return HttpResponse(conx2, content_type="application/json")
     if request.method == 'POST':
         number = request.POST.get('number')
         present_id = request.POST.get('present_id')
@@ -264,15 +265,54 @@ def car(request, user_id):
         object.save()
         return HttpResponse(json.dumps(context), content_type="application/json")
 
-
-
-#需要讨论
+#done
 def orders(request, user_id):
-    return
+    user = User.objects.get(pk=user_id)
+    context = {
+        'error': 0
+    }
+    if (not user) or ('USER_Id' not in request.session) or ('IS_LOGIN' not in request.session) \
+            or (request.session['USER_Id'] != user_id):
+        context['error'] = 1
+        return HttpResponse(json.dumps(context), content_type="application/json")
+    if request.method == 'GET':
+        orderss = User.objects.get(pk=user_id).order_set.all()
+        conx = serializers.serialize("json", orderss)
+        conx2 = '{"error": 0, "car": ' + conx + '}'
+        return HttpResponse(conx2, content_type="application/json")
 
-def buy(request, order_id):
-    return
+#done
+def order(request, user_id, order_id):
+    user = User.objects.get(pk=user_id)
+    context = {
+        'error': 0
+    }
+    if (not user) or ('USER_Id' not in request.session) or ('IS_LOGIN' not in request.session) \
+            or (request.session['USER_Id'] != user_id):
+        context['error'] = 1
+        return HttpResponse(json.dumps(context), content_type="application/json")
+    if request.method=='GET':
+        user = User.objects.get(pk=user_id)
+        orderss = Order.objects.filter(user=user,pk=order_id)
+        if orderss:
+            orderss = orderss[0]
+            orderes = orderss.oru_set.all()
+            conx = serializers.serialize("json", orderes)
+            conx2 = '{"error": 0, "car": ' + conx + '}'
+            return HttpResponse(conx2, content_type="application/json")
+        else:
+            context['error']=1
+            return HttpResponse(json.dumps(context), content_type="application/json")
 
+
+def buy(request):
+    context = {
+        'error': 0
+    }
+    if ('IS_LOGIN' not in request.session or 'USER_Id' not in request.session):
+        context['error'] = 1
+        return HttpResponse(json.dumps(context), content_type="application/json")
+    if request.method=='POST':
 
 #done
 def search(request):
