@@ -82,7 +82,10 @@ def gifts(request):
         tags = request.GET.get('tags')
         if not tags:
             tags = []
-        if not categorise
+        categorise = request.GET.get('categorise')
+        if not categorise:
+            categorise = []
+        return
 
 
 #done
