@@ -313,6 +313,34 @@ def buy(request):
         context['error'] = 1
         return HttpResponse(json.dumps(context), content_type="application/json")
     if request.method=='POST':
+        user = User.objects.get(pk=request.session['USER_Id'])
+        object_orders = Order(status = "操作成功",
+                            receive_mark = 0,
+                            user = user,
+                            logistics = "null",
+                            begin_date = datetime.datetime.now(),
+                            sum_money = 0,
+                            user_feedback = "null",
+                            type = 0)
+        object_orders.save()
+        number = request.POST.getlist('number')
+        present_id = request.POST.getlist('present_id')
+        sum = 0
+        for i in range(len(present_id)):
+
+            present = Present.objects.get(pk=present_id[i])
+            object_car = Car.objects.filter(present=present, user=user)
+            if object_car:
+                object_car.delete()
+            count = number[i]
+            price = (float)(present.cost)*(float)(number[i])
+            order = object_orders
+            object_order = Oru(present=present,count=count,price=price,order=order)
+            object_order.save()
+            sum += price
+        object_orders.sum_money = sum
+        object_orders.save()
+        return HttpResponse(json.dumps(context), content_type="application/json")
 
 #done
 def search(request):
