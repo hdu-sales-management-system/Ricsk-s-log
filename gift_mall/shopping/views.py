@@ -138,9 +138,11 @@ def gifts(request):
                     gifts2.append(ss)
             except:
                 pass
+        print(gifts1)
+        print(gifts2)
         gifts1 = list(set(gifts1))
         gifts2 = list(set(gifts2))
-        giftss = list(set(gifts1).intersection(set(gifts2)))
+        giftss = list(set(gifts1).union(set(gifts2)))
         conx = serializers.serialize("json", giftss[offset:offset+count])
         return HttpResponse(conx, content_type="application/json")
 
@@ -226,8 +228,9 @@ def car(request, user_id):
         present_id = request.POST.get('present_id')
         present = Present.objects.get(pk=present_id)
         user = User.objects.get(pk=user_id)
-        car1 = Car.objects.filter(user=user, present=present)[0]
+        car1 = Car.objects.filter(user=user, present=present)
         if car1:
+            car1 = car1[0]
             car1.number = number
             car1.save()
         else:
@@ -241,16 +244,21 @@ def car(request, user_id):
             #print(key)
             present = Present.objects.get(pk=key)
             user = User.objects.get(pk=user_id)
-            object = Car.objects.filter(user=user, present=present)[0]
+            object = Car.objects.filter(user=user, present=present)
             '''
             car = User.objects.filter(pk=user_id)[0].car_set.all()
             for c in car:
                 if(c.present.id == key):
                     c.delete()
             '''
-            object.delete()
-            context['error'] = 2
-            return HttpResponse(json.dumps(context), content_type="application/json")
+            if object:
+                object = object[0]
+                object.delete()
+                context['error'] = 2
+                return HttpResponse(json.dumps(context), content_type="application/json")
+            else:
+                context['error'] = 3
+                return HttpResponse(json.dumps(context), content_type="application/json")
         else:
             context['error'] = 3
             return HttpResponse(json.dumps(context), content_type="application/json")
